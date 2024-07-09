@@ -7,16 +7,16 @@ const { createConnection } = require('./db.js');
 const server = express()
 server.use(cors());
 server.use(bodyParser.json());
-server.get("/", (req, res) => {
-console.log("GET /");
-res.send("Hola mundo");
-});
-
+server.set('view engine', 'ejs');
+server.engine('ejs', require('ejs').__express);
 const RUN = createConnection();
 
 
 server.use('/usuarios', usersRoutes);
 
+server.get('/headermain', (req, res) => {
+    res.render('partials/headermain');
+  });
 
 
 server.listen(3000, 'localhost', () => {
