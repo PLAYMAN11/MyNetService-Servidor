@@ -2,11 +2,23 @@ const express = require("express");
 const Router = express.Router();
 const { createConnection } = require("../db.js");
 const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv").config();
+const dotenv = require("dotenv");
 const { status } = require("init");
+const { send } = require("process");
 
 const RUN = createConnection();
+dotenv.config();
 
+
+Router.get("/TablaUsuarios", (req, res) => {
+RUN.query("SELECT * FROM usuarios", (err, result) => {
+    if (err) {
+       res.status(500).send("No se pudo obtener la tabla de usuarios");
+    } else {
+       res.status(200).send(result);
+       }
+});
+});
 
 Router.post("/Registro", (req, res) => {
     const { NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, Telefono, FECHA_NACIMIENTO } = req.body;
@@ -20,18 +32,20 @@ VALUES (?, ?, ?, ?, ?, "Activo", ?)`, [NombreUsuario, Contraseña, ApellidoUsuar
     });
 });
 
+
 Router.post("/IniciarSesion", (req, res) =>{
     const {CorreoUsuario, Contraseña} = req.body;
-    RUN.query('SELECT idUsuario From usuarios where CorreoUsuario = ? && Contraseña = ?', [CorreoUsuario, Contraseña], (err, result) =>{
+    RUN.query('SELECT idusuario From usuarios where CorreoUsuario = ? && Contraseña = ?', [CorreoUsuario, Contraseña], (err, result) =>{
         if(err){
             res.status(500).send("Sesion no encontrada");
         } else {
             if(result.length > 0){
-                const idUsuario = result[0].idUsuario;
+                const idUsuario = result[0].idusuario;
                 const token = jwt.sign(
                     {idUsuario}, 
                     process.env.jwtSecret, 
                     {expiresIn:process.env.jwtExpiresIn});
+                console.log(token);
                 const cookieOptions = {
                     expires: new Date (Date.now() + process.env.CookieExpiration * 24 * 60 * 60 * 1000),
                     path: '/',
