@@ -12,16 +12,14 @@ server.use(cookieParser());
 server.use(bodyParser.json());
 server.set('view engine', 'ejs');
 server.engine('ejs', require('ejs').__express);
-const RUN = createConnection();
-
+const RUN = createConnection(); 
 
 server.use('/usuarios', usersRoutes);
 
 server.get('/headermain', (req, res) => {
     res.render('partials/headermain');
   });
-
-
+  
 server.listen(3000, 'localhost', () => {
     console.log('Server running at http://localhost:3000');
 });

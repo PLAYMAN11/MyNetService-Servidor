@@ -1,0 +1,29 @@
+# MyNetService-Servidor
+
+## Descripción
+
+El programa es un servidor web construido con Node.js y Express, diseñado para proporcionar servicios de red para la plataforma MyNetService. Utiliza varias dependencias, incluyendo `express` para el manejo de rutas y middleware, `jsonwebtoken` para la autenticación, `dotenv` para la gestión de variables de entorno, y `mysql2` para la conexión a una base de datos MySQL. Además, utiliza `cookie-parser` para el manejo de cookies, `ejs` para el motor de plantillas, y `cors` para permitir solicitudes de origen cruzado.
+
+## Funcionalidad
+   - `Inicialización y Configuración`: El servidor se inicializa en Servidor.js, donde se configura el uso de middleware como cors, cookieParser, y bodyParser.json(). También se establece ejs como el motor de plantillas.
+   - `Conexión a la Base de Datos`: Utiliza createConnection de ./db.js para establecer una conexión a la base de datos MySQL.
+   - `Manejo de Rutas`: Define rutas específicas para usuarios (/usuarios) y otras rutas como /headermain. Las rutas de usuarios se manejan en Routes/usuarios.js.
+
+## Endpoints de la API 
+### usuarios `https://localhost:3000/usuarios/...`
+   - `GET /TablaUsuarios`: Muestra a los usuarios
+   - `POST /Registro`: Permite el registro de un nuevo usuario en la base de datos.
+   - `POST /IniciarSesion`: Autentica a un usuario y devuelve un token JWT si las credenciales son válidas.
+
+### views\partials `https://localhost:3000/...`
+   - `GET /Header`: Renderiza el header para las paginas web
+
+### Consultas a la Base de Datos
+- Las consultas a la base de datos se realizan mediante el objeto `RUN`, que es una conexión a la base de datos MySQL. Se utilizan consultas SQL parametrizadas para insertar y seleccionar datos, lo que ayuda a prevenir inyecciones SQL.
+
+### Autenticación
+- La autenticación se maneja mediante tokens JWT. En el endpoint `/IniciarSesion`, se genera un token utilizando `jsonwebtoken` si el usuario y contraseña proporcionados son válidos según la base de datos.
+
+### Variables de Entorno
+- Utiliza `dotenv` para cargar variables de entorno desde un archivo `.env` lo que incluye configuraciones sensibles como la clave secreta para JWT y posiblemente credenciales de la base de datos.
+
