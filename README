@@ -1,10 +1,9 @@
 # MyNetService-Servidor
 
 ## Descripción
-
 El programa es un servidor web construido con Node.js y Express, diseñado para proporcionar servicios de red para la plataforma MyNetService. Utiliza varias dependencias, incluyendo `express` para el manejo de rutas y middleware, `jsonwebtoken` para la autenticación, `dotenv` para la gestión de variables de entorno, y `mysql2` para la conexión a una base de datos MySQL. Además, utiliza `cookie-parser` para el manejo de cookies, `ejs` para el motor de plantillas, y `cors` para permitir solicitudes de origen cruzado.
 
-## Funcionalidad
+## Funcionamiento
    - `Inicialización y Configuración`: El servidor se inicializa en Servidor.js, donde se configura el uso de middleware como cors, cookieParser, y bodyParser.json(). También se establece ejs como el motor de plantillas.
    - `Conexión a la Base de Datos`: Utiliza createConnection de ./db.js para establecer una conexión a la base de datos MySQL.
    - `Manejo de Rutas`: Define rutas específicas para usuarios (/usuarios) y otras rutas como /headermain. Las rutas de usuarios se manejan en Routes/usuarios.js.
@@ -26,4 +25,3 @@ El programa es un servidor web construido con Node.js y Express, diseñado para 
 
 ### Variables de Entorno
 - Utiliza `dotenv` para cargar variables de entorno desde un archivo `.env` lo que incluye configuraciones sensibles como la clave secreta para JWT y posiblemente credenciales de la base de datos.
-
