@@ -5,10 +5,10 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const { status } = require("init");
 const { send } = require("process");
+const { Domain } = require("domain");
 
 const RUN = createConnection();
 dotenv.config();
-
 
 Router.get("/TablaUsuarios", (req, res) => {
 RUN.query("SELECT * FROM usuarios", (err, result) => {
@@ -33,31 +33,47 @@ VALUES (?, ?, ?, ?, ?, "Activo", ?)`, [NombreUsuario, Contraseña, ApellidoUsuar
 });
 
 
-Router.post("/IniciarSesion", (req, res) =>{
-    const {CorreoUsuario, Contraseña} = req.body;
-    RUN.query('SELECT idusuario From usuarios where CorreoUsuario = ? && Contraseña = ?', [CorreoUsuario, Contraseña], (err, result) =>{
-        if(err){
+Router.post("/IniciarSesion", (req, res) => {
+    const { CorreoUsuario, Contraseña } = req.body;
+    console.log("Iniciando sesión para:", CorreoUsuario); // Log de depuración
+
+    RUN.query('SELECT idusuario FROM usuarios WHERE CorreoUsuario = ? AND Contraseña = ?', [CorreoUsuario, Contraseña], (err, result) => {
+        if (err) {
+            console.error("Error en la consulta:", err); // Log de error
             res.status(500).send("Sesion no encontrada");
         } else {
-            if(result.length > 0){
+            console.log("Resultado de la consulta:", result); // Log del resultado
+            if (result.length > 0) {
                 const idUsuario = result[0].idusuario;
-                const token = jwt.sign(
-                    {idUsuario}, 
-                    process.env.jwtSecret, 
-                    {expiresIn:process.env.jwtExpiresIn});
-                console.log(token);
-                const cookieOptions = {
-                    expires: new Date (Date.now() + process.env.CookieExpiration * 24 * 60 * 60 * 1000),
-                    path: '/',
+
+                try {
+                    const token= jwt.sign(
+                        { idUsuario },
+                        process.env.jwtSecret,
+                        { expiresIn: process.env.jwtExpiresIn }
+                    );
+                    const cookieOptions = {
+                        expires: (process.env.CookieExpiration * 24 * 60 * 60 * 1000),
+                        path: '/',
+                        secure: false,
+                        httpOnly: true
+                    };
+                    res.status(200).json({
+                        token: token,
+                        expires: cookieOptions.expires,
+                        path: cookieOptions.path,
+                        secure: cookieOptions.secure,
+                        httpOnly: cookieOptions.httpOnly,
+                      });
+                } catch (error) {
+                    console.error("Error al generar el token:", error); // Log de error al generar el token
+                    res.status(500).send("Error al iniciar sesión");
                 }
-                res.cookie("jwt",token,cookieOptions);
-                res.send({status:'ok', message:'logged in'})
             } else {
                 res.status(401).send("Correo o contraseña incorrectos");
             }
         }
-    })
-
-})
+    });
+});
 
 module.exports = Router;

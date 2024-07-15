@@ -15,10 +15,12 @@
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.19.2",
+    "express-session": "^1.18.0",
     "jsonwebtoken": "^9.0.2",
     "jws": "^4.0.0",
     "lightweight-charts": "^4.1.7",
     "mysql2": "^3.10.2",
-    "node": "^22.4.0"
+    "node": "^22.4.0",
+    "uuidv4": "^6.2.13"
   }
 }
