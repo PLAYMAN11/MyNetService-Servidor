@@ -23,7 +23,8 @@ RUN.query("SELECT * FROM usuarios", (err, result) => {
 Router.post("/Registro", (req, res) => {
     const { NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, Telefono, FECHA_NACIMIENTO } = req.body;
     RUN.query(`INSERT INTO usuarios (NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, Telefono, Estado, FECHA_NACIMIENTO)
-VALUES (?, ?, ?, ?, ?, "Activo", ?)`, [NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, Telefono, FECHA_NACIMIENTO], (err, result) => {
+VALUES (?, ?, ?, ?, ?, "Activo", ?)`, [NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, Telefono, FECHA_NACIMIENTO], 
+(err, result) => {
         if (err) {
             res.status(500).send("Error al registrar usuario");
         } else {
@@ -77,3 +78,5 @@ Router.post("/IniciarSesion", (req, res) => {
 });
 
 module.exports = Router;
+
+
