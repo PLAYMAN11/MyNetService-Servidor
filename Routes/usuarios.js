@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const { status } = require("init");
 const { send } = require("process");
 const { Domain } = require("domain");
+const { validateCookie } = require("../middlewares/authorization.js");
 
 const RUN = createConnection();
 dotenv.config();
@@ -36,7 +37,6 @@ VALUES (?, ?, ?, ?, ?, "Activo", ?)`, [NombreUsuario, Contraseña, ApellidoUsuar
 
 Router.post("/IniciarSesion", (req, res) => {
     const { CorreoUsuario, Contraseña } = req.body;
-    console.log("Iniciando sesión para:", CorreoUsuario); // Log de depuración
 
     RUN.query('SELECT idusuario FROM usuarios WHERE CorreoUsuario = ? AND Contraseña = ?', [CorreoUsuario, Contraseña], (err, result) => {
         if (err) {
@@ -75,6 +75,32 @@ Router.post("/IniciarSesion", (req, res) => {
             }
         }
     });
+});
+
+Router.post('/rqCookieUsuario', (req, res) => {
+    const { cookie } = req.body;
+    console.log('Cookie recibida:', cookie);
+
+    if (validateCookie(cookie)) {
+        console.log('Cookie válida');
+        res.status(200).send('Autenticación exitosa');
+    } else {
+        console.log('Cookie inválida');
+        res.status(401).send('Autenticación fallida');
+    }
+});
+
+Router.post('/rqCookieGuest', (req, res) => {
+    const { cookie } = req.body;
+    console.log('Cookie recibida:', cookie);
+
+    if (validateCookie(cookie)) {
+        console.log('Cookie válida');
+        res.status(200).send('Autenticación exitosa');
+    } else {
+        console.log('Cookie inválida');
+        res.status(401).send('Autenticación fallida');
+    }
 });
 
 module.exports = Router;

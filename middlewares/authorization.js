@@ -1,15 +1,24 @@
-import { JsonWebTokenError } from "jsonwebtoken";
-import dotenv from "dotenv";
+const express = require("express");
+const Router = express.Router();
+const jwt = require('jsonwebtoken');
 
-function soloUser(req, res, next){
-    const cookieJWT = req.headers.cookies.split("; ").find(cookie => cookie.startsWith("jwt=")).slice(4);
-    const decodificada = jsonwebtoken.verify(cookieJWT, process.env.jwtSecret);
-}
-function soloInvitado(req, res, next){
-console.log("COOKIE", req.headers.cookies);
-}
+const validateCookie = (cookie) => {
+    try {
+        const token = cookie.split('=')[1];
+        const decoded = jwt.verify(token, process.env.jwtSecret);
+        return !!decoded; 
+    } catch (error) {
+        if (error instanceof jwt.JsonWebTokenError) {
+            console.error("Invalid cookie:", error.message);
+        } else if (error instanceof jwt.TokenExpiredError) {
+            console.error("Expired cookie:", error.message);
+        } else {
+            console.error("Error validating cookie:", error.message);
+        }
+        return false;
+    }
+};
 
-export const methods = {
-    soloUser,
-    soloInvitado
-}
+module.exports = { validateCookie };
+
+
