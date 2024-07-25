@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 const { status } = require("init");
 const { send } = require("process");
 const { Domain } = require("domain");
+const { log } = require("console");
 
 const RUN = createConnection();
 dotenv.config();
@@ -32,6 +33,47 @@ VALUES (?, ?, ?, ?, ?, "Activo", ?)`, [NombreUsuario, Contraseña, ApellidoUsuar
         }
     });
 });
+
+Router.post("/insAgregarSobremi", (req, res) => {
+    const { SOBREMI } = req.body;
+    RUN.query(`INSERT INTO usuarios (SOBREMI) values (?)`,[SOBREMI],
+        (err, result) => {
+        if (err) {
+           res.status(500).send("Error al ingresar sombre mi");
+        } else {
+           res.status(200).send("Sobre mi ingresado exitosamente");
+           }
+    });
+});
+
+
+Router.get("/nombreUsuarioPerfil", (req, res) => {
+    const { NombreUsuario } = req.body;
+    RUN.query("SELECT NombreUsuario FROM usuarios WHERE NombreUsuario = ?", [NombreUsuario],
+        (err) => {
+        if (err) {
+           res.status(500).send("No se pudo obtener el nombre de usuario");
+        } else {
+           res.status(200).send(result);
+           }
+    });
+});
+
+Router.get("/obtSobremiPerfil", (req, res) => {
+    const { SOBREMI } = req.body;
+    RUN.query("SELECT SOBREMI FROM usuarios WHERE NombreUsuario = ?", [NombreUsuario],
+        (err) => {
+        if (err) {
+           res.status(500).send("No se pudo obtener el sobre mi");
+        } else {
+           res.status(200).send(result);
+           }
+    });
+});
+
+
+
+
 
 
 Router.post("/IniciarSesion", (req, res) => {
@@ -78,5 +120,8 @@ Router.post("/IniciarSesion", (req, res) => {
 });
 
 module.exports = Router;
+
+
+
 
 
