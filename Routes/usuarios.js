@@ -11,6 +11,29 @@ const { validateCookie } = require("../middlewares/authorization.js");
 const RUN = createConnection();
 dotenv.config();
 
+function decodificarTokenParaID(req) {
+    const cookieHeader = req.body.cookie;
+    const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+        const [key, value] = cookie.split('=').map(c => c.trim());
+        acc[key] = value;
+        return acc;
+    }, {});
+    const token = cookies.jwt; // Suponiendo que el token se llama 'token' en la cookie
+
+    if (!token) {
+        throw new Error('No se encontró el token en la cookie');
+    }
+
+    let idUsuario;
+    try {
+        const decoded = jwt.verify(token, process.env.jwtSecret);
+        idUsuario = decoded.idUsuario;
+    } catch (err) {
+        throw new Error('Token inválido');
+    }
+    return idUsuario;
+}
+
 Router.get("/TablaUsuarios", (req, res) => {
 RUN.query("SELECT * FROM usuarios", (err, result) => {
     if (err) {
@@ -79,28 +102,39 @@ Router.post("/IniciarSesion", (req, res) => {
 
 Router.post('/rqCookieUsuario', (req, res) => {
     const { cookie } = req.body;
-    console.log('Cookie recibida:', cookie);
 
     if (validateCookie(cookie)) {
-        console.log('Cookie válida');
         res.status(200).send('Autenticación exitosa');
     } else {
-        console.log('Cookie inválida');
-        res.status(401).send('Autenticación fallida');
+res.status(401).send('Autenticación fallida');
     }
 });
 
 Router.post('/rqCookieGuest', (req, res) => {
     const { cookie } = req.body;
-    console.log('Cookie recibida:', cookie);
 
     if (validateCookie(cookie)) {
-        console.log('Cookie válida');
         res.status(200).send('Autenticación exitosa');
     } else {
-        console.log('Cookie inválida');
         res.status(401).send('Autenticación fallida');
     }
+});
+Router.post('/MostrarDinero', (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    console.log('El id usuario es: ', idUsuario);
+    const query = `
+        SELECT 
+            (SELECT MontoIngreso FROM Ingresos_Mensuales WHERE FKusuario = ?) AS Ingresos,
+            (SELECT MontoEgreso FROM Egresos_Mensuales WHERE FKusuario = ?) AS Egresos,
+            (SELECT CantidadActual FROM CantidadActual WHERE FKusuario = ? ORDER BY FechaCantidadActual DESC LIMIT 1) AS DineroActual
+    `;
+    RUN.query(query, [idUsuario, idUsuario, idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al obtener los datos');
+        } else {
+            res.status(200).json(result[0]);
+        }
+    });
 });
 
 module.exports = Router;
