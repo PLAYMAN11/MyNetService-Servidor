@@ -25,7 +25,6 @@ const RUN = createConnection();
 
 server.use('/usuarios', usersRoutes);
 
-// server.use('/MiddleWare', MiddleWaresRoutes);
 
 server.get('/headermain', (req, res) => {
   res.render('partials/headermain');

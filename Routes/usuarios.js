@@ -137,6 +137,46 @@ Router.post('/MostrarDinero', (req, res) => {
     });
 });
 
+Router.post('/MostrarServicios', (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    const query = `
+         SELECT 
+            ss.nombreservicio,
+            ss.precioservicio,
+            ss.tiposuscripcion
+        FROM 
+            ServiciosStreaming ss
+        JOIN 
+            Servicios s ON ss.idservicio = s.idservicios
+        WHERE 
+            s.idUsuario = ?
+    `;
+    RUN.query(query, [idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al obtener los egresos');
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
+
+Router.post('/MostrarComprasIndividurales', (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    const query = `
+        SELECT NombreGasto,  
+        CantidadGasto,
+        FROM Gastos WHERE FKusuario = ?;
+    `;
+    RUN.query(query, [idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al obtener los datos');
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
+
+
 module.exports = Router;
 
 
