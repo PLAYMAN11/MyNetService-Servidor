@@ -6,7 +6,9 @@ const dotenv = require("dotenv");
 const { status } = require("init");
 const { send } = require("process");
 const { Domain } = require("domain");
+const { log } = require("console");
 const { validateCookie } = require("../middlewares/authorization.js");
+
 
 const RUN = createConnection();
 dotenv.config();
@@ -56,6 +58,82 @@ VALUES (?, ?, ?, ?, ?, "Activo", ?)`, [NombreUsuario, Contraseña, ApellidoUsuar
         }
     });
 });
+
+Router.post("/insAgregarSobremi", (req, res) => {
+    const { SOBREMI } = req.body;
+    RUN.query(`INSERT INTO usuarios (SOBREMI) values (?)`,[SOBREMI],
+        (err, result) => {
+        if (err) {
+           res.status(500).send("Error al ingresar Notas");
+        } else {
+           res.status(200).send("Notas ingresado exitosamente");
+           }
+    });
+});
+
+
+Router.get("/nombreUsuarioPerfil", (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    console.log('El id usuario es: ', idUsuario);
+    const query = `
+        SELECT 
+            (SELECT NombreUsuario FROM USUARIOS WHERE idusuario = ?) AS NombreUsuario
+    `;
+    RUN.query(query,[idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al obtener los datos');
+        } else {
+            res.status(200).json(result[0]);
+        }
+    });
+});
+
+Router.get("/obtSobremiPerfil", (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    console.log('El id usuario es: ', idUsuario);
+    const query = `
+        SELECT 
+            (SELECT SOBREMI FROM USUARIOS WHERE idusuario = ?) AS Ingresos
+    `;
+    RUN.query(query,[idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al obtener los datos');
+        } else {
+            res.status(200).json(result[0]);
+        }
+    });
+});
+
+Router.post("/insFotoPerfil", (req, res) => {
+    const { FotoPerfil } = req.body;
+    const idUsuario = decodificarTokenParaID(req, res);
+    console.log('El id usuario es: ', idUsuario);
+    RUN.query(`INSERT INTO IMAGENESUSUARIO SET IDIMAGENUSUARIO = ? WHERE idusuario = ?`, [FotoPerfil, idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al insertar la foto de perfil');
+        } else {
+            res.status(200).send('Foto de perfil insertada correctamente');
+        }
+    });
+});
+
+
+Router.get("/obtFotoPerfil", (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    console.log('El id usuario es: ', idUsuario);
+    const query = `
+        SELECT 
+            (SELECT NOMBREIMAGEN FROM USUARIOS WHERE idusuario = ?) AS FotoPerfil
+    `;
+    RUN.query(query,[idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al obtener los datos');
+        } else {
+            res.status(200).json(result[0]);
+        }
+    });
+});
+
 
 
 Router.post("/IniciarSesion", (req, res) => {
