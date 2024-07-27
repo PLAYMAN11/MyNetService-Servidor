@@ -64,35 +64,43 @@ Router.post("/insAgregarSobremi", (req, res) => {
     RUN.query(`INSERT INTO usuarios (SOBREMI) values (?)`,[SOBREMI],
         (err, result) => {
         if (err) {
-           res.status(500).send("Error al ingresar sombre mi");
+           res.status(500).send("Error al ingresar Notas");
         } else {
-           res.status(200).send("Sobre mi ingresado exitosamente");
+           res.status(200).send("Notas ingresado exitosamente");
            }
     });
 });
 
 
 Router.get("/nombreUsuarioPerfil", (req, res) => {
-    const { NombreUsuario } = req.body;
-    RUN.query("SELECT NombreUsuario FROM usuarios WHERE NombreUsuario = ?", [NombreUsuario],
-        (err) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    console.log('El id usuario es: ', idUsuario);
+    const query = `
+        SELECT 
+            (SELECT NombreUsuario FROM USUARIOS WHERE idusuario = ?) AS NombreUsuario
+    `;
+    RUN.query(query,[idUsuario], (err, result) => {
         if (err) {
-           res.status(500).send("No se pudo obtener el nombre de usuario");
+            res.status(500).send('Error al obtener los datos');
         } else {
-           res.status(200).send(result);
-           }
+            res.status(200).json(result[0]);
+        }
     });
 });
 
 Router.get("/obtSobremiPerfil", (req, res) => {
-    const { SOBREMI } = req.body;
-    RUN.query("SELECT SOBREMI FROM usuarios WHERE NombreUsuario = ?", [NombreUsuario],
-        (err) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    console.log('El id usuario es: ', idUsuario);
+    const query = `
+        SELECT 
+            (SELECT SOBREMI FROM USUARIOS WHERE idusuario = ?) AS Ingresos
+    `;
+    RUN.query(query,[idUsuario], (err, result) => {
         if (err) {
-           res.status(500).send("No se pudo obtener el sobre mi");
+            res.status(500).send('Error al obtener los datos');
         } else {
-           res.status(200).send(result);
-           }
+            res.status(200).json(result[0]);
+        }
     });
 });
 
@@ -181,8 +189,5 @@ Router.post('/MostrarDinero', (req, res) => {
 });
 
 module.exports = Router;
-
-
-
 
 
