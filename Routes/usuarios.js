@@ -104,8 +104,35 @@ Router.get("/obtSobremiPerfil", (req, res) => {
     });
 });
 
+Router.post("/insFotoPerfil", (req, res) => {
+    const { FotoPerfil } = req.body;
+    const idUsuario = decodificarTokenParaID(req, res);
+    console.log('El id usuario es: ', idUsuario);
+    RUN.query(`INSERT INTO IMAGENESUSUARIO SET IDIMAGENUSUARIO = ? WHERE idusuario = ?`, [FotoPerfil, idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al insertar la foto de perfil');
+        } else {
+            res.status(200).send('Foto de perfil insertada correctamente');
+        }
+    });
+});
 
 
+Router.get("/obtFotoPerfil", (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    console.log('El id usuario es: ', idUsuario);
+    const query = `
+        SELECT 
+            (SELECT NOMBREIMAGEN FROM USUARIOS WHERE idusuario = ?) AS FotoPerfil
+    `;
+    RUN.query(query,[idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al obtener los datos');
+        } else {
+            res.status(200).json(result[0]);
+        }
+    });
+});
 
 
 
