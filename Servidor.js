@@ -7,7 +7,6 @@ const cookieParser = require('cookie-parser');
 const { createConnection } = require('./db.js');
 const Tokken = process.env.jwtSecret;
 const server = express()
-const MiddleWaresRoutes = require('./middlewares/authorization.js');
 server.use(cors(
     {
         origin: 'http://127.0.0.1:5502',
@@ -23,7 +22,6 @@ const RUN = createConnection();
 
 
 server.use('/usuarios', usersRoutes);
-
 
 server.get('/headermain', (req, res) => {
   res.render('partials/headermain');

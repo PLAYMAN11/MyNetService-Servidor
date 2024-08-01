@@ -59,47 +59,30 @@ VALUES (?, ?, ?, ?, ?)`, [NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsu
     });
 });
 
-Router.post("/insAgregarSobremi", (req, res) => {
-    const { SOBREMI } = req.body;
-    RUN.query(`INSERT INTO usuarios (SOBREMI) values (?)`,[SOBREMI],
-        (err, result) => {
-        if (err) {
-           res.status(500).send("Error al ingresar Notas");
-        } else {
-           res.status(200).send("Notas ingresado exitosamente");
-           }
-    });
-});
-
-
-Router.get("/nombreUsuarioPerfil", (req, res) => {
+Router.post("/ActualizarDatos", (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
-    console.log('El id usuario es: ', idUsuario);
     const query = `
-        SELECT 
-            (SELECT NombreUsuario FROM USUARIOS WHERE idusuario = ?) AS NombreUsuario
-    `;
+            SELECT idusuario, NombreUsuario, ApellidoUsuario, CorreoUsuario, SOBREMI FROM USUARIOS WHERE idusuario = ?
+        `;
     RUN.query(query,[idUsuario], (err, result) => {
         if (err) {
             res.status(500).send('Error al obtener los datos');
         } else {
-            res.status(200).json(result[0]);
+            res.status(200).json(result);
         }
     });
 });
 
-Router.get("/obtSobremiPerfil", (req, res) => {
+Router.post("/MostrarDatosUsuario", (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
-    console.log('El id usuario es: ', idUsuario);
     const query = `
-        SELECT 
-            (SELECT SOBREMI FROM USUARIOS WHERE idusuario = ?) AS Ingresos
-    `;
+            SELECT idusuario, NombreUsuario, ApellidoUsuario, CorreoUsuario, SOBREMI FROM USUARIOS WHERE idusuario = ?
+        `;
     RUN.query(query,[idUsuario], (err, result) => {
         if (err) {
             res.status(500).send('Error al obtener los datos');
         } else {
-            res.status(200).json(result[0]);
+            res.status(200).json(result);
         }
     });
 });
@@ -215,13 +198,43 @@ Router.post('/MostrarDinero', (req, res) => {
     });
 });
 
+Router.post('/AgregarServicio', (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    const { Nombre, Precio } = req.body;
+        // el id del servicio correspondiente al usuario
+        const queryGetServiceId = `
+        SELECT idservicios 
+        FROM Servicios 
+        WHERE idUsuario = ?;
+    `;
+
+    RUN.query(queryGetServiceId, [idUsuario], (err, result) => {
+        const idServicio = result[0].idservicios;
+        // Luego, insertamos el nuevo servicio de streaming
+        const queryInsertService = `
+            INSERT INTO ServiciosStreaming (nombreservicio, precioservicio, idservicio)
+            VALUES (?, ?, ?);
+        `;
+
+        RUN.query(queryInsertService, [Nombre, Precio, idServicio], (err, result) => {
+            if (err) {
+                // Manejo de errores
+                res.status(500).send('Error al insertar el servicio de streaming');
+                return;
+            }
+
+            // Inserción exitosa
+            res.status(200).send('Servicio insertado correctamente');
+        });
+    });
+});
+
 Router.post('/MostrarServicios', (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
     const query = `
-         SELECT 
-            ss.nombreservicio,
-            ss.precioservicio,
-            ss.tiposuscripcion
+        SELECT 
+            ss.nombreservicio as nombre,
+            ss.precioservicio as precio
         FROM 
             ServiciosStreaming ss
         JOIN 
@@ -229,11 +242,13 @@ Router.post('/MostrarServicios', (req, res) => {
         WHERE 
             s.idUsuario = ?
     `;
+
     RUN.query(query, [idUsuario], (err, result) => {
         if (err) {
-            res.status(500).send('Error al obtener los egresos');
+            console.error('Error al obtener los servicios:', err); // Añadir log para errores
+            res.status(500).send('Error al obtener los servicios');
         } else {
-            res.status(200).json(result);
+              res.status(200).json(result);
         }
     });
 });
@@ -242,7 +257,7 @@ Router.post('/MostrarComprasIndividurales', (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
     const query = `
         SELECT NombreGasto,  
-        CantidadGasto,
+        CantidadGasto
         FROM Gastos WHERE FKusuario = ?;
     `;
     RUN.query(query, [idUsuario], (err, result) => {
@@ -251,6 +266,29 @@ Router.post('/MostrarComprasIndividurales', (req, res) => {
         } else {
             res.status(200).json(result);
         }
+    });
+});
+
+Router.post('/MostrarGastos12Ultimosmeses', (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    const query = `
+        SELECT MontoTotal as value, FechaRegistro AS time
+        FROM RegistroMensual
+        WHERE FKusuario = ?
+        AND FechaRegistro >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+        ORDER BY FechaRegistro ASC
+    `;
+    RUN.query(query, [idUsuario], (error, resultados) => {
+        if (error) {
+            console.log ('Error al obtener los datos', error);
+            return res.status(500).json({ error: 'Error al obtener los datos', error});
+        }
+        const formattedResult = resultados.map(result => {
+            const formattedTime = result.time.toISOString().split('T')[0];
+            return { value: result.value, time: formattedTime };
+        });
+        res.status(200).send(formattedResult);
+        console.log('Resultados:', formattedResult);
     });
 });
 

@@ -3,6 +3,11 @@ const Router = express.Router();
 const jwt = require('jsonwebtoken');
 
 const validateCookie = (cookie) => {
+    if (typeof cookie !== 'string') {
+        console.error("Cookie is not a string");
+        return false;
+    }
+
     try {
         const token = cookie.split('=')[1];
         const decoded = jwt.verify(token, process.env.jwtSecret);
