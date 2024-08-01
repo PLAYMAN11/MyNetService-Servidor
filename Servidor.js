@@ -26,6 +26,9 @@ server.use('/usuarios', usersRoutes);
 server.get('/headermain', (req, res) => {
   res.render('partials/headermain');
 });
+server.get('/headermaintr', (req, res) => {
+    res.render('partials/headermaintr');
+  });
   
 server.listen(3000, 'localhost', () => {
     console.log('Server running at http://localhost:3000'); 
