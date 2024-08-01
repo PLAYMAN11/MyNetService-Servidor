@@ -18,7 +18,6 @@ server.use(cookieParser());
 server.use(bodyParser.json());
 server.set('view engine', 'ejs');
 server.engine('ejs', require('ejs').__express);
-
 const RUN = createConnection(); 
 
 
