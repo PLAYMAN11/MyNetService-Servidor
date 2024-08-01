@@ -59,47 +59,30 @@ VALUES (?, ?, ?, ?, ?)`, [NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsu
     });
 });
 
-Router.post("/insAgregarSobremi", (req, res) => {
-    const { SOBREMI } = req.body;
-    RUN.query(`INSERT INTO usuarios (SOBREMI) values (?)`,[SOBREMI],
-        (err, result) => {
-        if (err) {
-           res.status(500).send("Error al ingresar Notas");
-        } else {
-           res.status(200).send("Notas ingresado exitosamente");
-           }
-    });
-});
-
-
-Router.get("/nombreUsuarioPerfil", (req, res) => {
+Router.post("/ActualizarDatos", (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
-    console.log('El id usuario es: ', idUsuario);
     const query = `
-        SELECT 
-            (SELECT NombreUsuario FROM USUARIOS WHERE idusuario = ?) AS NombreUsuario
-    `;
+            SELECT idusuario, NombreUsuario, ApellidoUsuario, CorreoUsuario, SOBREMI FROM USUARIOS WHERE idusuario = ?
+        `;
     RUN.query(query,[idUsuario], (err, result) => {
         if (err) {
             res.status(500).send('Error al obtener los datos');
         } else {
-            res.status(200).json(result[0]);
+            res.status(200).json(result);
         }
     });
 });
 
-Router.get("/obtSobremiPerfil", (req, res) => {
+Router.post("/MostrarDatosUsuario", (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
-    console.log('El id usuario es: ', idUsuario);
     const query = `
-        SELECT 
-            (SELECT SOBREMI FROM USUARIOS WHERE idusuario = ?) AS Ingresos
-    `;
+            SELECT idusuario, NombreUsuario, ApellidoUsuario, CorreoUsuario, SOBREMI FROM USUARIOS WHERE idusuario = ?
+        `;
     RUN.query(query,[idUsuario], (err, result) => {
         if (err) {
             res.status(500).send('Error al obtener los datos');
         } else {
-            res.status(200).json(result[0]);
+            res.status(200).json(result);
         }
     });
 });
