@@ -6,8 +6,10 @@ const dotenv = require("dotenv");
 const { status } = require("init");
 const { send } = require("process");
 const { Domain } = require("domain");
-const { log } = require("console");
+const { log, error } = require("console");
 const { validateCookie } = require("../middlewares/authorization.js");
+const crypto = require('crypto');
+const { run } = require("node:test");
 
 
 const RUN = createConnection();
@@ -121,8 +123,8 @@ Router.get("/obtFotoPerfil", (req, res) => {
 
 Router.post("/IniciarSesion", (req, res) => {
     const { CorreoUsuario, Contraseña } = req.body;
-
-    RUN.query('SELECT idusuario FROM usuarios WHERE CorreoUsuario = ? AND Contraseña = ?', [CorreoUsuario, Contraseña], (err, result) => {
+    const encryptedPassword = crypto.createHash('md5').update(Contraseña).digest('hex');
+    RUN.query('SELECT idusuario FROM usuarios WHERE CorreoUsuario = ? AND Contraseña = ?', [CorreoUsuario, encryptedPassword], (err, result) => {
         if (err) {
             console.error("Error en la consulta:", err); // Log de error
             res.status(500).send("Sesion no encontrada");
@@ -184,11 +186,11 @@ Router.post('/MostrarDinero', (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
     console.log('El id usuario es: ', idUsuario);
     const query = `
-        SELECT 
-            (SELECT MontoIngreso FROM Ingresos_Mensuales WHERE FKusuario = ?) AS Ingresos,
-            (SELECT MontoEgreso FROM Egresos_Mensuales WHERE FKusuario = ?) AS Egresos,
-            (SELECT CantidadActual FROM CantidadActual WHERE FKusuario = ? ORDER BY FechaCantidadActual DESC LIMIT 1) AS DineroActual
-    `;
+    SELECT 
+        (SELECT SUM(MontoIngreso) FROM Ingresos_Mensuales WHERE FKusuario = ?) AS Ingresos,
+        (SELECT SUM(MontoEgreso) FROM Egresos_Mensuales WHERE FKusuario = ?) AS Egresos,
+        (SELECT CantidadActual FROM CantidadActual WHERE FKusuario = ? ORDER BY FechaCantidadActual DESC LIMIT 1) AS DineroActual
+`;
     RUN.query(query, [idUsuario, idUsuario, idUsuario], (err, result) => {
         if (err) {
             res.status(500).send('Error al obtener los datos');
@@ -253,11 +255,11 @@ Router.post('/MostrarServicios', (req, res) => {
     });
 });
 
-Router.post('/MostrarComprasIndividurales', (req, res) => {
+Router.post('/MostrarComprasIndividuales', (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
     const query = `
         SELECT NombreGasto,  
-        CantidadGasto
+        CantidadGasto, PrecioGasto
         FROM Gastos WHERE FKusuario = ?;
     `;
     RUN.query(query, [idUsuario], (err, result) => {
@@ -265,6 +267,17 @@ Router.post('/MostrarComprasIndividurales', (req, res) => {
             res.status(500).send('Error al obtener los datos');
         } else {
             res.status(200).json(result);
+        }
+    });
+});
+Router.post('/IngresarCompra', (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    const { NombreGasto, CantidadGasto, PrecioGasto } = req.body;
+    RUN.query(`INSERT INTO Gastos (NombreGasto, CantidadGasto, PrecioGasto, FKusuario) VALUES (?, ?, ?, ?)`, [NombreGasto, CantidadGasto, PrecioGasto, idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al insertar la compra');
+        } else {
+            res.status(200).send('Compra insertada correctamente');
         }
     });
 });
@@ -292,6 +305,17 @@ Router.post('/MostrarGastos12Ultimosmeses', (req, res) => {
     });
 });
 
+Router.post('/ActualizarIngresoMensual', (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    const { MontoIngreso } = req.body;
+    RUN.query(`UPDATE Ingresos_Mensuales SET MontoIngreso = ? WHERE FKusuario = ?`, [MontoIngreso, idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al actualizar el ingreso mensual');
+        } else {
+            res.status(200).send('Ingreso mensual actualizado correctamente');
+        }
+    });
+});
 
 module.exports = Router;
 
