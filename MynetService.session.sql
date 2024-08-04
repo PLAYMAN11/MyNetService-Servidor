@@ -1,0 +1,1 @@
+SELECT * from ingresos_mensuales where FKusuario = 1;

@@ -62,17 +62,38 @@ VALUES (?, ?, ?, ?, ?)`, [NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsu
 });
 
 Router.post("/ActualizarDatos", (req, res) => {
-    const idUsuario = decodificarTokenParaID(req, res);
-    const query = `
-            SELECT idusuario, NombreUsuario, ApellidoUsuario, CorreoUsuario, SOBREMI FROM USUARIOS WHERE idusuario = ?
-        `;
-    RUN.query(query,[idUsuario], (err, result) => {
-        if (err) {
-            res.status(500).send('Error al obtener los datos');
-        } else {
-            res.status(200).json(result);
+    try {
+        const idUsuario = decodificarTokenParaID(req, res);
+        if (!idUsuario) {
+            return res.status(400).send('Invalid user ID');
         }
-    });
+        let queryParams = '';
+        let values = [];
+        for (const key in req.body) {
+            if (req.body.hasOwnProperty(key) && key !== 'cookie' && req.body[key] !== '') {
+            queryParams += `${key} = ?, `;
+            values.push(req.body[key]);
+            }
+        }
+        queryParams = queryParams.slice(0, -2);
+        values.push(idUsuario);
+
+        const query = `UPDATE Usuarios SET ${queryParams} WHERE idusuario = ?`;
+        console.log('Executing query:', query);
+        console.log('With values:', values);
+
+        RUN.query(query, values, (err, result) => {
+            if (err) {
+                console.error('Error executing query:', err);
+                return res.status(500).send('Error al actualizar los datos');
+            } else {
+                return res.status(200).json(result);
+            }
+        });
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        return res.status(500).send('Unexpected error occurred');
+    }
 });
 
 Router.post("/MostrarDatosUsuario", (req, res) => {
@@ -102,7 +123,6 @@ Router.post("/insFotoPerfil", (req, res) => {
     });
 });
 
-
 Router.get("/obtFotoPerfil", (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
     console.log('El id usuario es: ', idUsuario);
@@ -118,8 +138,6 @@ Router.get("/obtFotoPerfil", (req, res) => {
         }
     });
 });
-
-
 
 Router.post("/IniciarSesion", (req, res) => {
     const { CorreoUsuario, Contraseña } = req.body;
@@ -182,6 +200,7 @@ Router.post('/rqCookieGuest', (req, res) => {
         res.status(401).send('Autenticación fallida');
     }
 });
+
 Router.post('/MostrarDinero', (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
     console.log('El id usuario es: ', idUsuario);
@@ -211,7 +230,7 @@ Router.post('/AgregarServicio', (req, res) => {
     `;
 
     RUN.query(queryGetServiceId, [idUsuario], (err, result) => {
-        const idServicio = result[0].idservicios;
+        const idServicio = result[1].idservicios;
         // Luego, insertamos el nuevo servicio de streaming
         const queryInsertService = `
             INSERT INTO ServiciosStreaming (nombreservicio, precioservicio, idservicio)
@@ -270,6 +289,7 @@ Router.post('/MostrarComprasIndividuales', (req, res) => {
         }
     });
 });
+
 Router.post('/IngresarCompra', (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
     const { NombreGasto, CantidadGasto, PrecioGasto } = req.body;
@@ -307,8 +327,8 @@ Router.post('/MostrarGastos12Ultimosmeses', (req, res) => {
 
 Router.post('/ActualizarIngresoMensual', (req, res) => {
     const idUsuario = decodificarTokenParaID(req, res);
-    const { MontoIngreso } = req.body;
-    RUN.query(`UPDATE Ingresos_Mensuales SET MontoIngreso = ? WHERE FKusuario = ?`, [MontoIngreso, idUsuario], (err, result) => {
+    const { Ingreso } = req.body;
+    RUN.query(`UPDATE Ingresos_Mensuales SET MontoIngreso = ? WHERE FKusuario = ?`, [Ingreso, idUsuario], (err, result) => {
         if (err) {
             res.status(500).send('Error al actualizar el ingreso mensual');
         } else {
@@ -317,6 +337,20 @@ Router.post('/ActualizarIngresoMensual', (req, res) => {
     });
 });
 
+Router.post('/IngresarIngresoIndividual', (req, res) => {
+    const idUsuario = decodificarTokenParaID(req, res);
+    const { Nombre, Monto } = req.body;
+    RUN.query(`INSERT INTO Ingreso (NombreIngreso, MontoIngreso, FKusuario) VALUES (?, ?, ?)`, 
+        [Nombre, Monto, idUsuario], (err, result) => {
+        if (err) {
+            res.status(500).send('Error al insertar el ingreso');
+        } else {
+            res.status(200).send('Ingreso insertada correctamente');
+        }
+    });
+});
+
 module.exports = Router;
+
 
 
