@@ -41,12 +41,12 @@ Router.get("/TablaUsuarios", async (req, res) => {
 });
 
 Router.post("/Registro", async (req, res) => {
-    const { NombreUsuario, Contrasenia, ApellidoUsuario, CorreoUsuario, FECHA_NACIMIENTO } = req.body;
+    const { NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, FECHA_NACIMIENTO } = req.body;
     try {
         await pool.query(
             `INSERT INTO Usuarios (NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, FECHA_NACIMIENTO)
             VALUES (?, ?, ?, ?, ?)`,
-            [NombreUsuario, Contrasenia, ApellidoUsuario, CorreoUsuario, FECHA_NACIMIENTO]
+            [NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, FECHA_NACIMIENTO]
         );
         res.status(200).send("Usuario registrado exitosamente");
     } catch (err) {
