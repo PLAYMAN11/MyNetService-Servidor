@@ -3,9 +3,9 @@ const mysql = require('mysql2');
 function createConnection() {
     return mysql.createConnection({
         host: 'localhost',
-        user: 'root',
-        password: 'root',
-        database: 'MyNetService',
+        user: 'u359191253_Emmanuel',
+        password: 'GonzHern1104',
+        database: 'u359191253_MynetService',
         port: '3306',
     });
 }

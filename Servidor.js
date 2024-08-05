@@ -9,7 +9,7 @@ const Tokken = process.env.jwtSecret;
 const server = express()
 server.use(cors(
     {
-        origin: 'http://127.0.0.1:5502',
+        origin: 'https://mynetservice.store/',
         credentials: true,
     }
 ));
