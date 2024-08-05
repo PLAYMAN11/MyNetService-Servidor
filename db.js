@@ -5,7 +5,7 @@ function createConnection() {
         host: 'localhost',
         user: 'root',
         password: 'root',
-        database: 'mynetservice',
+        database: 'MyNetService',
         port: '3306',
     });
 }
