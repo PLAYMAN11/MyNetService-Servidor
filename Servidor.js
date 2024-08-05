@@ -9,7 +9,7 @@ const Tokken = process.env.jwtSecret;
 
 const server = express();
 server.use(cors({
-    origin: 'https://mynetservice.store/',
+    origin: 'https://integradora-hz0g.onrender.com/',
     credentials: true,
 }));
 server.use(cookieParser());
