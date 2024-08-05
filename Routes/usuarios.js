@@ -33,10 +33,10 @@ function decodificarTokenParaID(req) {
 
 Router.get("/TablaUsuarios", async (req, res) => {
     try {
-        const [result] = await pool.query("SELECT * FROM usuarios");
+        const [result] = await pool.query("SELECT * FROM Usuarios");
         res.status(200).send(result);
     } catch (err) {
-        res.status(500).send("No se pudo obtener la tabla de usuarios");
+        res.status(500).send("No se pudo obtener la tabla de Usuarios");
     }
 });
 
@@ -44,7 +44,7 @@ Router.post("/Registro", async (req, res) => {
     const { NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, FECHA_NACIMIENTO } = req.body;
     try {
         await pool.query(
-            `INSERT INTO usuarios (NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, FECHA_NACIMIENTO)
+            `INSERT INTO Usuarios (NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, FECHA_NACIMIENTO)
             VALUES (?, ?, ?, ?, ?)`,
             [NombreUsuario, Contraseña, ApellidoUsuario, CorreoUsuario, FECHA_NACIMIENTO]
         );
@@ -121,7 +121,7 @@ Router.post("/IniciarSesion", async (req, res) => {
     const { CorreoUsuario, Contraseña } = req.body;
     const encryptedPassword = crypto.createHash('md5').update(Contraseña).digest('hex');
     try {
-        const [result] = await pool.query('SELECT idusuario FROM usuarios WHERE CorreoUsuario = ? AND Contraseña = ?', [CorreoUsuario, encryptedPassword]);
+        const [result] = await pool.query('SELECT idusuario FROM Usuarios WHERE CorreoUsuario = ? AND Contraseña = ?', [CorreoUsuario, encryptedPassword]);
         if (result.length > 0) {
             const idUsuario = result[0].idusuario;
             const token = jwt.sign({ idUsuario }, process.env.jwtSecret, { expiresIn: process.env.jwtExpiresIn });
