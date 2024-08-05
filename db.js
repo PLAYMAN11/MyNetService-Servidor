@@ -4,7 +4,7 @@ function createConnection() {
     return mysql.createConnection({
         host: '156.67.73.253',
         user: 'u359191253_Emmanuel',
-        password: 'GonzHern1104',
+        password: 'qhmQMBu2E',
         database: 'u359191253_MynetService',
         port: '3306',
     });
