@@ -26,8 +26,10 @@ server.get('/headermaintr', (req, res) => {
     res.render('partials/headermaintr');
 });
 
-server.listen(3000, 'localhost', () => {
-    console.log('Server running at http://localhost:3000');
+// Change 'localhost' to '0.0.0.0' for external access
+server.listen(3000, '0.0.0.0', () => {
+    console.log('Server running at http://0.0.0.0:3000');
 });
 
 module.exports = pool;
+
