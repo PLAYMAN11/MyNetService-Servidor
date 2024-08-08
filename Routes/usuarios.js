@@ -89,6 +89,7 @@ Router.post("/MostrarDatosUsuario", async (req, res) => {
         res.status(200).json(result);
     } catch (err) {
         res.status(500).send('Error al obtener los datos');
+        console.log(err);
     }
 });
 
