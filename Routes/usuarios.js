@@ -83,7 +83,7 @@ Router.post("/MostrarDatosUsuario", async (req, res) => {
     try {
         const idUsuario = decodificarTokenParaID(req, res);
         const query = `
-            SELECT idusuario, NombreUsuario, ApellidoUsuario, CorreoUsuario, SOBREMI FROM usuarios WHERE idusuario = ?
+            SELECT idusuario, NombreUsuario, ApellidoUsuario, CorreoUsuario, SOBREMI FROM Usuarios WHERE idusuario = ?
         `;
         const [result] = await pool.query(query, [idUsuario]);
         res.status(200).json(result);
